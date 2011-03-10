@@ -109,9 +109,7 @@ module AssetID
         # replace css urls
         if mime_type == 'text/css'
           data.gsub!(/(\.{0,2}\/?images\/[^\)\?]+)/i) do |path|
-            path.gsub!(/^\.{0,2}\/?/, '')
-            new_path = fingerprint(path)
-            puts "asset_id: replacing #{path} with #{new_path} in #{asset}"
+            fingerprint(path.gsub!(/^\.{0,2}\/?/, ''))
           end
         end
         
@@ -122,7 +120,10 @@ module AssetID
         end
         
         # debug
-        puts "asset_id: headers: #{headers.inspect}" if options[:debug]
+        if options[:debug]
+          puts "content: #{data}"
+          puts "asset_id: headers: #{headers.inspect}" 
+        end
         
         # store object
         AWS::S3::S3Object.store(fingerprint(asset), data, s3_bucket, headers) unless options[:dry_run]
