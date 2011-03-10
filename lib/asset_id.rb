@@ -108,7 +108,7 @@ module AssetID
         
         # replace css urls
         if mime_type == 'text/css'
-          data.gsub(/(\.{0,2}\/?images\/[^\)\?]+)/i) do |path|
+          data.gsub!(/(\.{0,2}\/?images\/[^\)\?]+)/i) do |path|
             path.gsub!(/^\.{0,2}\/?/, '')
             new_path = fingerprint(path)
             puts "asset_id: replacing #{path} with #{new_path} in #{asset}"
@@ -116,10 +116,10 @@ module AssetID
         end
         
         # gzip content
-        # if gzip_types.include? mime_type
-        #   data = `gzip -c #{asset}`
-        #   headers.merge!(gzip_headers)
-        # end
+        if gzip_types.include? mime_type
+          data = Zlib::Deflate.deflate(data)
+          headers.merge!(gzip_headers)
+        end
         
         # debug
         puts "asset_id: headers: #{headers.inspect}" if options[:debug]
