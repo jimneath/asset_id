@@ -103,6 +103,9 @@ module AssetID
           :access => s3_permissions,
         }.merge(cache_headers)
         
+        # load data
+        data = File.read(asset)
+        
         # replace css urls
         if mime_type == 'text/css'
           data.gsub(/url\(["']?(\.{0,2}\/?images\/[^\)\?]+)/i) do |path|
@@ -112,12 +115,10 @@ module AssetID
         end
         
         # gzip content
-        if gzip_types.include? mime_type
-          data = `gzip -c #{asset}`
-          headers.merge!(gzip_headers)
-        else
-          data = File.read(asset)
-        end
+        # if gzip_types.include? mime_type
+        #   data = `gzip -c #{asset}`
+        #   headers.merge!(gzip_headers)
+        # end
         
         # debug
         puts "asset_id: headers: #{headers.inspect}" if options[:debug]
