@@ -113,7 +113,7 @@ module AssetID
         # replace css urls
         if mime_type == 'text/css'
           data.gsub!(/(\.{0,2}\/?images\/[^"'\)]+)/i) do |path|
-            fingerprint(path.gsub!(/^\.{0,2}\/?/, '').gsub!(/\/?\d+$/, ''))
+            fingerprint(path.gsub!(/^\.{0,2}\/?/, '').gsub!(/\?\d+$/, ''))
           end
         end
         
