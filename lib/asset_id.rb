@@ -113,17 +113,17 @@ module AssetID
           end
         end
         
-        # gzip content
-        if gzip_types.include? mime_type
-          data = Zlib::Deflate.deflate(data)
-          headers.merge!(gzip_headers)
-        end
-        
-        # debug
-        if options[:debug]
-          puts "content: #{data}"
-          puts "asset_id: headers: #{headers.inspect}" 
-        end
+        # # gzip content
+        # if gzip_types.include? mime_type
+        #   data = Zlib::Deflate.deflate(data)
+        #   headers.merge!(gzip_headers)
+        # end
+        # 
+        # # debug
+        # if options[:debug]
+        #   puts "content: #{data}"
+        #   puts "asset_id: headers: #{headers.inspect}" 
+        # end
         
         # store object
         AWS::S3::S3Object.store(fingerprint(asset), data, s3_bucket, headers) unless options[:dry_run]
