@@ -68,7 +68,7 @@ module AssetID
     def self.cache_headers
       {
         'Cache-Control' => 'max-age=315360000',
-        'Expires' => (Time.now + (10 * 60 * 60 * 24 * 365)).years.from_now.httpdate,
+        'Expires' => (Time.now + (10 * 60 * 60 * 24 * 365)).httpdate,
       }
     end
     
