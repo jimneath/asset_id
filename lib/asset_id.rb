@@ -40,11 +40,9 @@ module AssetID
       path = path.gsub(path_prefix, '')
       File.join File.dirname(path), "#{File.basename(path, File.extname(path))}-id-#{d}#{File.extname(path)}"
     end
-    
   end
   
   class S3 < AssetID::Base
-    
     DEFAULT_GZIP_TYPES = ['text/css', 'application/javascript']
     @@gzip_types = DEFAULT_GZIP_TYPES
     
@@ -68,11 +66,17 @@ module AssetID
     end
     
     def self.cache_headers
-      {'Expires' => (Time.now + (60*60*24*365)).httpdate, 'Cache-Control' => 'public'} # 1 year expiry
+      {
+        'Cache-Control' => 'max-age=315360000',
+        'Expires' => (Time.now + (10 * 60 * 60 * 24 * 365)).years.from_now.httpdate,
+      }
     end
     
     def self.gzip_headers
-      {'Content-Encoding' => 'gzip', 'Vary' => 'Accept-Encoding'}
+      {
+        'Content-Encoding' => 'gzip', 
+        'Vary' => 'Accept-Encoding'
+      }
     end
     
     def self.s3_permissions
@@ -117,12 +121,6 @@ module AssetID
         # if gzip_types.include? mime_type
         #   data = Zlib::Deflate.deflate(data)
         #   headers.merge!(gzip_headers)
-        # end
-        # 
-        # # debug
-        # if options[:debug]
-        #   puts "content: #{data}"
-        #   puts "asset_id: headers: #{headers.inspect}" 
         # end
         
         # store object
