@@ -4,7 +4,6 @@ require 'aws/s3'
 require 'time'
 
 module AssetID
-  
   class Base
     DEFAULT_ASSET_PATHS = ['favicon.ico', 'images', 'javascripts', 'stylesheets']
     @@asset_paths = DEFAULT_ASSET_PATHS
@@ -29,7 +28,7 @@ module AssetID
       asset_paths.inject([]) {|assets, path|
         path = absolute_path(path)
         assets << path if File.exists? path and !File.directory? path
-        assets += Dir.glob(path+'/**/*').inject([]) {|m, file| 
+        assets += Dir.glob(path + '/**/*').inject([]) {|m, file| 
           m << file unless File.directory? file; m 
         }
       }
@@ -92,14 +91,27 @@ module AssetID
     def self.upload(options={})
       connect_to_s3
       assets.each do |asset|
+        # debug
         puts "asset_id: Uploading #{asset} as #{fingerprint(asset)}" if options[:debug]
+        
+        # grab mime type
         mime_type = MIME::Types.of(asset).first.to_s
         
+        # merge headers
         headers = {
           :content_type => mime_type,
           :access => s3_permissions,
         }.merge(cache_headers)
         
+        # replace css urls
+        if mime_type == 'text/css'
+          data.gsub(/url\(["']?(\.{0,2}\/?images\/[^\)\?]+)/i) do |path|
+            new_path = fingerprint(path)
+            puts "asset_id: replacing #{path} with #{new_path} in #{asset}"
+          end
+        end
+        
+        # gzip content
         if gzip_types.include? mime_type
           data = `gzip -c #{asset}`
           headers.merge!(gzip_headers)
@@ -107,16 +119,12 @@ module AssetID
           data = File.read(asset)
         end
         
+        # debug
         puts "asset_id: headers: #{headers.inspect}" if options[:debug]
         
-        AWS::S3::S3Object.store(
-          fingerprint(asset),
-          data,
-          s3_bucket,
-          headers
-        ) unless options[:dry_run]
+        # store object
+        AWS::S3::S3Object.store(fingerprint(asset), data, s3_bucket, headers) unless options[:dry_run]
       end
     end
-    
   end
 end
